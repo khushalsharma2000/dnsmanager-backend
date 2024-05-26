@@ -38,10 +38,10 @@ export const listHostedZones = async (req, res) => {
 
 // Controller to create a new DNS record
 export const createDNSRecord = async (req,res) => {
-  try {
+  console.log('rq-body - ',req.body);
     const {dnsRecordData, code} = req.body;
     const {domainName, recordType, recordValue} = dnsRecordData;
-    console.log('rq-body - ',req.body);
+    
     const params = {
       ChangeBatch: {
         Changes: [
@@ -50,7 +50,8 @@ export const createDNSRecord = async (req,res) => {
             ResourceRecordSet: {
               Name: domainName,
               Type: recordType,
-              TTL: 300, // TTL in seconds
+              TTL: 300,
+               // TTL in seconds
               ResourceRecords: [{ Value: recordValue }],
             },
           },
@@ -58,17 +59,19 @@ export const createDNSRecord = async (req,res) => {
       },
       HostedZoneId: code
     };
-
+    console.log("hello");
+  try {
+    
     const data = await route53.changeResourceRecordSets(params).promise();
 
-    console.log(data);
+    console.log(data,"hello");
 
-    return data;
+    res.json({ message: "DNS record created successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json('Failed to create DNS record');
   }
-};
+ };
 
 // Controller to update a DNS record
 export const updateDNSRecord = async (req, res) => {
@@ -77,7 +80,7 @@ export const updateDNSRecord = async (req, res) => {
     console.log('update - ',req.body)
     if (dnsRecordData.recordType !== 'SOA') {
       const params = {
-        HostedZoneId: req.body.code, // Replace with your hosted zone ID
+        HostedZoneId: code, // Replace with your hosted zone ID
         ChangeBatch: {
           Changes: [
             {
@@ -85,7 +88,7 @@ export const updateDNSRecord = async (req, res) => {
               ResourceRecordSet: {
                 Name: dnsRecordData.Name,
                 Type: dnsRecordData.Type,
-                TTL: dnsRecordData.ttl, 
+                TTL: 300, 
                 ResourceRecords: [
                   {
                     Value: dnsRecordData.Value,
